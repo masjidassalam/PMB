@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Laporan Mubaligh</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#047857">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PMB">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            emerald: { 50: '#ecfdf5', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    input, select, textarea { font-size: 16px !important; }
+    header { padding-top: calc(0.75rem + env(safe-area-inset-top, 0px)); }
+    nav { padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px)); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-24">
+
+  <!-- HEADER -->
+  <header class="bg-emerald-800 text-white px-4 pb-3 shadow sticky top-0 z-30 flex items-center justify-between">
+    <div class="flex items-center space-x-2.5">
+      <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
+        <i class="ph-bold ph-mosque text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="font-bold text-sm leading-tight">LAPORAN MUBALIGH</h1>
+        <p class="text-[10px] text-emerald-200">Kecamatan Sagulung, Batam</p>
+      </div>
+    </div>
+    <span id="badgeOffline" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">Offline</span>
+  </header>
+
+  <!-- KONTEN UTAMA -->
+  <main class="max-w-xl mx-auto p-3.5 sm:p-4 space-y-3.5">
+
+    <!-- TAB 1: INPUT -->
+    <section id="tab-input" class="space-y-3 block">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-700">
+          <i class="ph-bold ph-users text-emerald-700 text-xl"></i>
+          <span class="uppercase tracking-wider">Status Anda:</span>
+        </div>
+        <span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1 rounded-lg text-xs font-bold">Mubaligh Aktif</span>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+            <i class="ph-bold ph-pencil-simple-line text-base"></i> Catat Kegiatan Baru
+          </span>
+          <span id="badgeHariIni" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+            Memuat...
+          </span>
+        </div>
+
+        <form id="formKegiatan" onsubmit="handleFormSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Tanggal Kegiatan</label>
+            <input type="date" id="tanggal" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:outline-none focus:border-emerald-600">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Uraian Kegiatan</label>
+            <textarea id="kegiatan" rows="3" placeholder="Contoh: Mengisi kajian / Memimpin yasinan..." required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600"></textarea>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Keterangan Tambahan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="keterangan" placeholder="Contoh: Hadir 50 jamaah" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-600">
+          </div>
+          <button type="submit" id="btnSimpan" class="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow flex items-center justify-center gap-1.5 transition-all mt-2">
+            <i class="ph-bold ph-floppy-disk text-base"></i> Simpan Kegiatan
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 2: REKAP -->
+    <section id="tab-rekap" class="space-y-3 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="border-b pb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+            <i class="ph-bold ph-file-text text-base"></i> Rekap & Cetak Laporan
+          </span>
+        </div>
+        <div class="text-xs">
+          <label class="block font-semibold text-slate-600 mb-1">Pilih Bulan Laporan</label>
+          <select id="filterBulan" onchange="filterTabelData()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:outline-none focus:border-emerald-600"></select>
+        </div>
+        <button type="button" id="btnPDF" onclick="cetakPDF()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow flex items-center justify-center gap-1.5 transition-all mt-1">
+          <i class="ph-bold ph-printer text-base text-amber-400"></i> Download PDF
+        </button>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+            <i class="ph-bold ph-list-numbers text-emerald-700 text-base"></i> Daftar Kegiatan
+          </span>
+        </div>
+        <div id="cardContainer" class="space-y-2 max-h-[60vh] overflow-y-auto divide-y divide-slate-100 pr-1 text-xs"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-1.5 pt-1.5 flex justify-around items-center z-40 shadow-lg max-w-xl mx-auto">
+    <button type="button" onclick="switchTab('input', this)" id="nav-input" class="flex flex-col items-center text-emerald-700 font-bold flex-1">
+      <i class="ph-bold ph-pencil-simple text-xl"></i>
+      <span class="text-[10px] mt-0.5">Input</span>
+    </button>
+    <button type="button" onclick="switchTab('rekap', this)" id="nav-rekap" class="flex flex-col items-center text-slate-400 font-medium flex-1">
+      <i class="ph-bold ph-file-text text-xl"></i>
+      <span class="text-[10px] mt-0.5">Rekap & Cetak</span>
+    </button>
+  </nav>
+
+  <script>
+    // ==========================================
+    // GANTI URL INI DENGAN URL WEB APP ANDA
+    // (Apps Script > Deploy > Web app > "Anyone")
+    // ==========================================
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzB1WzaB4nnNSzwuVG7fLPze5w0iMVhD8qEcAOagvkc7AXb7H6-AXkfOKeMcn-aa2goRg/exec";
+
+    let globalData = null;
+
+    // --- PWA: service worker ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW gagal:', err));
+      });
+    }
+
+    // --- Indikator offline ---
+    function updateOnline() {
+      document.getElementById('badgeOffline').classList.toggle('hidden', navigator.onLine);
+    }
+    window.addEventListener('online', () => { updateOnline(); loadData(); });
+    window.addEventListener('offline', updateOnline);
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    window.onload = function () {
+      const today = new Date();
+      document.getElementById('tanggal').valueAsDate = today;
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      document.getElementById('badgeHariIni').innerText = days[today.getDay()] + ' (Otomatis)';
+      updateOnline();
+      loadData();
+    };
+
+    window.switchTab = function (tabName, element) {
+      document.getElementById('tab-input').classList.add('hidden');
+      document.getElementById('tab-rekap').classList.add('hidden');
+      document.getElementById('nav-input').className = "flex flex-col items-center text-slate-400 font-medium flex-1";
+      document.getElementById('nav-rekap').className = "flex flex-col items-center text-slate-400 font-medium flex-1";
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+      element.className = "flex flex-col items-center text-emerald-700 font-bold flex-1";
+      if (tabName === 'rekap') filterTabelData();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // --- Ambil data dari Google Apps Script ---
+    function loadData() {
+      const box = document.getElementById('cardContainer');
+      box.innerHTML = '<div class="py-6 text-center text-slate-400 italic text-xs animate-pulse">Menghubungkan ke Google Sheets...</div>';
+
+      fetch(GAS_WEB_APP_URL + "?action=getDataLaporan")
+        .then(r => r.json())
+        .then(res => {
+          globalData = res;
+          const sel = document.getElementById("filterBulan");
+          sel.innerHTML = "";
+          if (!res.daftarBulan || res.daftarBulan.length === 0) {
+            sel.innerHTML = '<option value="">Belum ada data</option>';
+          } else {
+            res.daftarBulan.forEach(item => {
+              const opt = document.createElement("option");
+              opt.value = item.key;
+              opt.textContent = item.label;
+              sel.appendChild(opt);
+            });
+          }
+          filterTabelData();
+        })
+        .catch(err => {
+          console.error(err);
+          box.innerHTML = '<div class="py-6 text-center text-red-400 italic text-xs">Gagal memuat data.</div>';
+          if (navigator.onLine) {
+            Swal.fire('Koneksi Gagal', 'Tidak dapat terhubung ke Google Sheets. Pastikan URL Web App benar dan sudah di-deploy dengan akses "Anyone".', 'error');
+          }
+        });
+    }
+
+    function filterTabelData() {
+      if (!globalData) return;
+      const selected = document.getElementById("filterBulan").value;
+      const container = document.getElementById("cardContainer");
+      container.innerHTML = "";
+
+      const filtered = (globalData.semuaKegiatan || []).filter(i => !selected || i.bulanKey === selected);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="py-6 text-center text-slate-400 italic text-xs">Tidak ada kegiatan pada bulan ini.</div>';
+        return;
+      }
+
+      filtered.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "pt-2 pb-2 flex justify-between items-start gap-3";
+        card.innerHTML = `
+          <div class="flex-1">
+            <span class="font-bold text-slate-800 text-sm block leading-tight mb-1">${esc(item.kegiatan)}</span>
+            <span class="text-[10px] text-slate-400">#${index + 1} • ${esc(item.tanggal)}</span>
+            ${item.keterangan ? `<div class="text-[11px] text-slate-600 mt-1 border-t border-slate-100 pt-1"><b>Ket:</b> ${esc(item.keterangan)}</div>` : ''}
+          </div>
+          <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap">${esc(item.bulanLabel || 'Kegiatan')}</span>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function resetBtnSimpan(btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph-bold ph-floppy-disk text-base"></i> Simpan Kegiatan';
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      if (!navigator.onLine) {
+        Swal.fire('Offline', 'Tidak ada koneksi internet. Coba lagi saat online.', 'warning');
+        return;
+      }
+      const btn = document.getElementById("btnSimpan");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-base"></i> Menyimpan ke Sheet...';
+
+      const data = {
+        tanggal: document.getElementById("tanggal").value,
+        kegiatan: document.getElementById("kegiatan").value,
+        keterangan: document.getElementById("keterangan").value
+      };
+
+      fetch(GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari preflight CORS
+        body: JSON.stringify({ action: 'simpanData', data })
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.status !== 'success') throw new Error(res.message || 'Gagal menyimpan');
+          Swal.fire({ title: 'Berhasil!', text: res.message, icon: 'success', timer: 1500, showConfirmButton: false });
+          document.getElementById("formKegiatan").reset();
+          document.getElementById('tanggal').valueAsDate = new Date();
+          resetBtnSimpan(btn);
+          loadData();
+        })
+        .catch(err => {
+          Swal.fire('Gagal', 'Gagal menyimpan ke Google Sheets: ' + err.message, 'error');
+          resetBtnSimpan(btn);
+        });
+    }
+
+    function cetakPDF() {
+      const bulan = document.getElementById("filterBulan").value;
+      if (!bulan) {
+        Swal.fire('Peringatan', 'Pilih bulan terlebih dahulu.', 'warning');
+        return;
+      }
+      const btn = document.getElementById('btnPDF');
+      const labelAwal = '<i class="ph-bold ph-printer text-base text-amber-400"></i> Download PDF';
+      btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-base"></i> Menyiapkan PDF...';
+      btn.disabled = true;
+
+      fetch(GAS_WEB_APP_URL + "?action=generatePDF&bulan=" + encodeURIComponent(bulan))
+        .then(r => r.text())
+        .then(b64 => {
+          const bin = atob(b64.trim());
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "Laporan_Mubaligh_" + bulan + ".pdf";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+          btn.innerHTML = labelAwal;
+          btn.disabled = false;
+          Swal.fire({ title: 'PDF Siap', text: 'File PDF berhasil diunduh.', icon: 'success', timer: 2000, showConfirmButton: false });
+        })
+        .catch(() => {
+          btn.innerHTML = labelAwal;
+          btn.disabled = false;
+          Swal.fire('Gagal', 'Gagal membuat PDF.', 'error');
+        });
+    }
+  </script>
+</body>
+</html>
