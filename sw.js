@@ -1,4 +1,4 @@
-const CACHE = 'pmb-v6';
+const CACHE = 'pmb-v7';
 const SHELL = [
   './',
   './index.html',
